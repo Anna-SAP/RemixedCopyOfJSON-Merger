@@ -173,7 +173,6 @@ export const processZipFiles = (files: File[]): Promise<{ blob: Blob; preview: s
             });
             
             const fullJsonString = JSON.stringify(finalResult, null, 2);
-            const blob = new Blob([fullJsonString], { type: 'application/json' });
 
             const PREVIEW_LENGTH = 20000;
             let preview = fullJsonString;
@@ -182,8 +181,8 @@ export const processZipFiles = (files: File[]): Promise<{ blob: Blob; preview: s
                 preview = fullJsonString.substring(0, PREVIEW_LENGTH) + '\\n\\n[...]\\n\\n--- CONTENT TRUNCATED ---\\n\\n\\nThe full file is available for download.';
             }
 
-            // Return blob, preview AND the structured data for filtering in the UI
-            return { blob, preview, data: finalResult };
+            // Return fullJsonString instead of Blob to avoid corruption when worker terminates
+            return { fullJsonString, preview, data: finalResult };
         };
 
         self.onmessage = async (event) => {
@@ -213,7 +212,8 @@ export const processZipFiles = (files: File[]): Promise<{ blob: Blob; preview: s
         worker.onmessage = (event: MessageEvent) => {
             const { type, result, error } = event.data;
             if (type === 'success') {
-                resolve(result);
+                const blob = new Blob([result.fullJsonString], { type: 'application/json' });
+                resolve({ blob, preview: result.preview, data: result.data });
             } else if (type === 'error') {
                 reject(new Error(error));
             }
