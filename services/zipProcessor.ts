@@ -174,12 +174,7 @@ export const processZipFiles = (files: File[]): Promise<{ blob: Blob; preview: s
             
             const fullJsonString = JSON.stringify(finalResult, null, 2);
 
-            const PREVIEW_LENGTH = 20000;
             let preview = fullJsonString;
-
-            if (fullJsonString.length > PREVIEW_LENGTH) {
-                preview = fullJsonString.substring(0, PREVIEW_LENGTH) + '\\n\\n[...]\\n\\n--- CONTENT TRUNCATED ---\\n\\n\\nThe full file is available for download.';
-            }
 
             // Return fullJsonString instead of Blob to avoid corruption when worker terminates
             return { fullJsonString, preview, data: finalResult };

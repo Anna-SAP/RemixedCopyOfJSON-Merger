@@ -35,6 +35,10 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, blob }) =
         URL.revokeObjectURL(url);
     };
 
+    const PREVIEW_LIMIT = 50000;
+    const isTruncated = content.length > PREVIEW_LIMIT;
+    const displayContent = isTruncated ? content.slice(0, PREVIEW_LIMIT) : content;
+
     return (
         <div className="relative bg-slate-100 dark:bg-slate-900 rounded-lg">
             <div className="absolute top-2 right-2 flex space-x-2">
@@ -53,8 +57,16 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, blob }) =
                     <Icon name="download" className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                 </button>
             </div>
-            <pre className="w-full h-96 overflow-auto p-4 text-sm text-left rounded-lg">
-                <code className="language-json">{content}</code>
+            {isTruncated && (
+                <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-4 py-2 text-xs text-center border-b border-amber-200 dark:border-amber-800 rounded-t-lg">
+                    Preview is limited to the first 50,000 characters for performance. The downloaded file contains the complete data.
+                </div>
+            )}
+            <pre className="w-full h-96 overflow-auto p-4 text-sm text-left rounded-b-lg">
+                <code className="language-json">
+                    {displayContent}
+                    {isTruncated && "\n\n... (preview truncated) ..."}
+                </code>
             </pre>
         </div>
     );
